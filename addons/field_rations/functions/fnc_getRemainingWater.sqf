@@ -15,15 +15,31 @@
  */
 #include "script_component.hpp"
 
+//find is case sensitive, so keep everything lowercase
+#define WATER_P3DS [\
+    "misc_wellpump.p3d"\
+    ]
+
 params [["_source", objNull, [objNull]]];
 
-if (isNull _source) exitWith {0};
+if (!alive _source) exitWith {0};
 
 private _water = _source getVariable QGVAR(currentWaterSupply);
 
 if (isNil "_water") then {
-    _water = getNumber (configFile >> "CfgVehicles" >> typeOf _source >> QGVAR(waterSupply));
-    _source setVariable [QGVAR(currentWaterSupply), _water, true];
+    private _typeOf = typeOf _source;
+    if (_typeOf != "") then { // Have type, check config
+        _water = getNumber (configFile >> "CfgVehicles" >> _typeOf >> QGVAR(waterSupply));
+        if ((_water != 0) && {_water != REFILL_WATER_DISABLED}) then {
+            if ([_source] call CBA_fnc_isTerrainObject) then {
+                _water = REFILL_WATER_INFINITE;
+            } else {
+                _source setVariable [QGVAR(currentWaterSupply), _water, true];
+            };
+        };
+    } else { // Check the p3d name against list
+        _water = if (((getModelInfo _source) select 0) in WATER_P3DS) then { REFILL_WATER_INFINITE } else { 0 };
+    };
 };
 
 _water

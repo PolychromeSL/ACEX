@@ -14,6 +14,9 @@ class CfgVehicles {
         };
     };
 
+    class ACE_LogicDummy;
+    class GVAR(helper): ACE_LogicDummy {};
+
     class Items_base_F;
     class Land_WaterBarrel_F: Items_base_F {
         GVAR(waterSupply) = 200;
